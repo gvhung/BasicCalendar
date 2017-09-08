@@ -49,14 +49,26 @@ namespace BasicCalendar
         public CalendarDay()
         {
             InitializeComponent();
+            AntiAliasDayNumberLabel();
             CurrentDay = DateTime.Now;
         }
 
         public CalendarDay(DateTime day, bool inCurrentMonth = true)
         {
             InitializeComponent();
+            AntiAliasDayNumberLabel();
             SetDay(day, InCurrentMonth);   
         }
+
+        private void AntiAliasDayNumberLabel()
+        {
+            lblDayNumber.Paint += delegate (object sender, PaintEventArgs e)
+            {
+                e.Graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAlias;
+                base.OnPaint(e);
+            };
+        }
+
 
         public void SetDay(DateTime day, bool inCurrentMonth = true)
         {
@@ -64,6 +76,7 @@ namespace BasicCalendar
             InCurrentMonth = inCurrentMonth;
             _updateDayHeader();
         }
+
         public void ClearItems()
         {
             pnlDayContents.Controls.Clear();
@@ -101,7 +114,21 @@ namespace BasicCalendar
         private void _updateDayHeader()
         {
             lblDayNumber.Text = CurrentDay.ToString("MMM d").ToUpper();
-            pnlDayLabel.BackColor = (InCurrentMonth ? (DateTime.Now.ToString("MMM d").ToUpper() == lblDayNumber.Text ? SystemColors.Highlight : SystemColors.ActiveCaption) : SystemColors.InactiveCaption);
+            if(!InCurrentMonth)
+            {
+                pnlDayLabel.BackColor = Theme.OutOfMonthDayBG;
+                lblDayNumber.ForeColor = Theme.OutOfMonthDayFG;
+            }
+            else if(DateTime.Now.ToString("MMM d").ToUpper() == lblDayNumber.Text)
+            {
+                pnlDayLabel.BackColor = Theme.TodayBG;
+                lblDayNumber.ForeColor = Theme.TodayFG;
+            }
+            else
+            {
+                pnlDayLabel.BackColor = Theme.InMonthDayBG;
+                lblDayNumber.ForeColor = Theme.InMonthDayFG;
+            }
         }
 
         public override string ToString()
